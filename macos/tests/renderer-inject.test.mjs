@@ -20,6 +20,17 @@ assert.doesNotMatch(
   "Task-route child layering must not overwrite the native header position.",
 );
 
+assert.match(
+  css,
+  /html\.codex-dream-skin \.group\\\/home-suggestions button > span:first-child > span:first-child\s*\{[^}]*\bdisplay:\s*grid !important;[^}]*\bplace-items:\s*center !important;/,
+  "Home suggestion icon badges must center their contents even before route decoration completes.",
+);
+assert.match(
+  css,
+  /html\.codex-dream-skin \.group\\\/home-suggestions button svg\s*\{[^}]*\bdisplay:\s*block !important;[^}]*\bmargin:\s*0 !important;[^}]*\bplace-self:\s*center !important;/,
+  "Home suggestion glyphs must clear native inline margins and center inside their icon badges.",
+);
+
 assert.doesNotMatch(
   css,
   /background-image:\s*var\(--dream-skin-art\),\s*var\(--dream-skin-art\)/,
@@ -154,6 +165,7 @@ function createFixture(theme, {
   nativeShell = "light",
   analysisFixture = null,
   analysisCache = null,
+  structuralHomePresent = false,
 } = {}) {
   let fixtureShell = nativeShell;
   const nodes = new Map();
@@ -193,6 +205,19 @@ function createFixture(theme, {
       return { ...shellBox };
     },
   };
+  const routeClassList = createClassList();
+  const routeClasses = routeClassList.values;
+  const routeMain = {
+    classList: routeClassList,
+    querySelector(selector) {
+      if (!structuralHomePresent) return null;
+      if (selector === '[data-feature="game-source"]') return {};
+      if (selector === '.group\\/home-suggestions') return {};
+      return null;
+    },
+    querySelectorAll() { return []; },
+  };
+  const homeIndicator = { closest() { return null; } };
 
   const createElement = (tagName) => {
     if (tagName === "canvas" && analysisFixture) {
@@ -234,9 +259,17 @@ function createFixture(theme, {
     getElementById(id) { return nodes.get(id) ?? null; },
     querySelector(selector) {
       if (selector === "main.main-surface" || selector === "main") return shellMain;
+      if (selector === '[data-testid="home-icon"]') return structuralHomePresent ? homeIndicator : null;
       return null;
     },
-    querySelectorAll() { return []; },
+    querySelectorAll(selector) {
+      if (selector === '[role="main"]') return structuralHomePresent ? [routeMain] : [];
+      if (selector === '[role="main"].dream-skin-home') {
+        return routeClasses.has("dream-skin-home") ? [routeMain] : [];
+      }
+      if (selector === ".dream-skin-home") return routeClasses.has("dream-skin-home") ? [routeMain] : [];
+      return [];
+    },
   };
   const mediaQuery = {
     matches: false,
@@ -331,6 +364,7 @@ function createFixture(theme, {
     payloadFor,
     revokedUrls,
     resizeObservers,
+    routeClasses,
     root,
     rootStyle,
     shellBox,
@@ -372,6 +406,18 @@ assert.equal(defaultMetrics.layoutReads, 2, "Shell ResizeObserver changes must r
 const defaultChrome = defaults.nodes.get("codex-dream-skin-chrome");
 assert.equal(defaultChrome.style.values.get("left"), "196px");
 assert.equal(defaultChrome.style.values.get("width"), "1084px");
+
+const structuralHome = createFixture({
+  id: "structural-home",
+  appearance: "light",
+  art: { safeArea: "left", taskMode: "ambient" },
+}, { structuralHomePresent: true });
+vm.runInNewContext(structuralHome.payload, structuralHome.context);
+assert.equal(
+  structuralHome.routeClasses.has("dream-skin-home"),
+  true,
+  "Home detection must fall back to the current structural markers when home-icon sits outside role=main.",
+);
 
 // Auto appearance must continue following the native shell after the skin is
 // already installed. The fixture makes the injected root color-scheme win

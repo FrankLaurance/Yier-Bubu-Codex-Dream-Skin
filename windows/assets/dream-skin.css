@@ -359,7 +359,15 @@ html.codex-dream-skin.dream-safe-center .dream-home > div:first-child > div:firs
   box-shadow: 0 0 0 6px var(--dream-accent-soft);
 }
 
-.dream-home .group\/home-suggestions button svg {
+html.codex-dream-skin .group\/home-suggestions button > span:first-child > span:first-child {
+  display: grid !important;
+  place-items: center !important;
+}
+
+html.codex-dream-skin .group\/home-suggestions button svg {
+  display: block !important;
+  margin: 0 !important;
+  place-self: center !important;
   width: 20px !important;
   height: 20px !important;
   color: currentColor !important;

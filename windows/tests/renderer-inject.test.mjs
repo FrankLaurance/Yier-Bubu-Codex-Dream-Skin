@@ -20,10 +20,22 @@ assert.doesNotMatch(
   "The skin must preserve Codex's native fixed header so the side-panel toggle remains reachable.",
 );
 
+assert.match(
+  css,
+  /html\.codex-dream-skin \.group\\\/home-suggestions button > span:first-child > span:first-child\s*\{[^}]*\bdisplay:\s*grid !important;[^}]*\bplace-items:\s*center !important;/,
+  "Home suggestion icon badges must center their contents even before route decoration completes.",
+);
+assert.match(
+  css,
+  /html\.codex-dream-skin \.group\\\/home-suggestions button svg\s*\{[^}]*\bdisplay:\s*block !important;[^}]*\bmargin:\s*0 !important;[^}]*\bplace-self:\s*center !important;/,
+  "Home suggestion glyphs must clear native inline margins and center inside their icon badges.",
+);
+
 function createFixture({
   shellPresent,
   staleSkin = false,
   homePresent = false,
+  structuralHomePresent = false,
   utilityPresent = false,
   shellAppearance = "dark",
   computedColorScheme = "",
@@ -100,6 +112,12 @@ function createFixture({
   const utilityNode = { classList: makeClassList(utilityClasses) };
   const routeMain = {
     classList: makeClassList(routeClasses),
+    querySelector(selector) {
+      if (!structuralHomePresent) return null;
+      if (selector === '[data-feature="game-source"]') return {};
+      if (selector === '.group\\/home-suggestions') return {};
+      return null;
+    },
     querySelectorAll(selector) {
       if (selector === '[class*="_homeUtilityBar_"]' && utilityPresent) return [utilityNode];
       return [];
@@ -297,6 +315,17 @@ assert.equal(configured.routeClasses.has("dream-task"), false);
 assert.equal(configured.utilityClasses.has("dream-home-utility"), true);
 assert.equal(configured.context.window.__CODEX_DREAM_SKIN_STATE__.cleanup(), true);
 assert.equal(configured.utilityClasses.has("dream-home-utility"), false);
+
+const structuralHome = createFixture({
+  shellPresent: true,
+  structuralHomePresent: true,
+});
+vm.runInNewContext(payload, structuralHome.context);
+assert.equal(
+  structuralHome.routeClasses.has("dream-home"),
+  true,
+  "Home detection must fall back to the current structural markers when home-icon sits outside role=main.",
+);
 
 const analysisPixels = new Uint8ClampedArray(48 * 12 * 4);
 for (let index = 0; index < 48 * 12; index += 1) {
