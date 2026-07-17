@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "preset-yier-bubu-cozy",
+  "name": "一二布布 · 暖暖编码",
+  "brandSubtitle": "一二布布 · COZY CODING",
+  "tagline": "今天也和一二布布一起，写点软乎乎的代码。",
+  "projectPrefix": "选择项目 · ",
+  "projectLabel": "◉  选择项目",
+  "statusText": "一二布布陪你编码",
+  "quote": "今天也要加油鸭！",
+  "image": "background.jpg",
+  "appearance": "auto",
+  "art": {
+    "focusX": 0.79,
+    "focusY": 0.48,
+    "safeArea": "left",
+    "taskMode": "ambient"
+  },
+  "colors": {
+    "background": "#FFF7E6",
+    "panel": "#FFFCF5",
+    "panelAlt": "#FFF1D2",
+    "accent": "#E8A93D",
+    "accentAlt": "#F4C667",
+    "secondary": "#A8D0B6",
+    "highlight": "#9A6548",
+    "text": "#4B3528",
+    "muted": "#8D7765",
+    "line": "rgba(154, 101, 72, .22)"
+  }
+}
